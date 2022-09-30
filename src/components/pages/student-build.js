@@ -11,13 +11,13 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 // import DialogActions from "@mui/material/DialogActions";
-// import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import { nanoid } from "nanoid";
 
 import rows from "../rows-data.json";
 import ReadOnlyRows from "../layouts/readOnlyRows";
-import EditableRows from "../layouts/editableRows";
+import EditableRow from "../layouts/editableRow";
 
 import "../css/students.css";
 
@@ -50,7 +50,14 @@ const StudentsBuild = (props) => {
     Batch: "",
   });
 
-  // const [editStudentId, setEditStudentId] = useState();
+  const [editFormData, setEditFormData] = useState({
+    Name: "",
+    Age: "",
+    Course: "",
+    Batch: "",
+  });
+
+  const [editStudentId, setEditStudentId] = useState(null);
 
   const handleAddFormChange = (event) => {
     event.preventDefault();
@@ -62,6 +69,17 @@ const StudentsBuild = (props) => {
     newFormData[fieldName] = fieldValue;
 
     setAddFormData(newFormData);
+  };
+
+  const handleEditFormChange = (event) => {
+    event.preventDefault();
+    const fieldName = event.target.getAttribute("name");
+    const fieldValue = event.target.value;
+
+    const newFormData = { ...editFormData };
+    newFormData[fieldName] = fieldValue;
+
+    setEditFormData(newFormData);
   };
 
   const handleAddFormSubmit = (event) => {
@@ -79,9 +97,38 @@ const StudentsBuild = (props) => {
     setStudents(newStudents);
   };
 
-  useEffect(() => {
-    console.log("Students", students);
-  }, [students]);
+  const handleEditClick = (e, student) => {
+    e.preventDefault();
+    setEditStudentId(student.Id);
+
+    const formValues = {
+      Name: student.Name,
+      Age: student.Age,
+      Course: student.Course,
+      Batch: student.Batch,
+    };
+
+    setEditFormData(formValues);
+  };
+
+  const handleEditFormSubmit = (event) => {
+    event.preventDefault();
+
+    const editedStudent = {
+      Id: editStudentId,
+      Name: editFormData.Name,
+      Age: editFormData.Age,
+      Course: editFormData.Course,
+      Batch: editFormData.Batch,
+    };
+
+    const newStudents = [...students];
+    const index = students.findIndex((student) => student.Id === editStudentId);
+
+    newStudents[index] = editedStudent;
+    setStudents(newStudents);
+    setEditStudentId(null);
+  };
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("Students_Details"));
@@ -104,7 +151,7 @@ const StudentsBuild = (props) => {
           </Button>
         </header>
 
-        <form onSubmit={handleAddFormSubmit}>
+        <form onSubmit={handleEditFormSubmit}>
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 450 }} aria-label="simple table">
               <TableHead>
@@ -122,20 +169,21 @@ const StudentsBuild = (props) => {
                     key={student.Id}
                     sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                   >
-                    
+                    {editStudentId === student.Id ? (
+                      <EditableRow
+                        open={editForm}
+                        handleClose={handleEditClose}
+                        editFormData={editFormData}
+                        handleEditFormChange={handleEditFormChange}
+                        handleEditFormSubmit={handleEditFormSubmit}
+                      />
+                    ) : null}
+
                     <ReadOnlyRows
                       student={student}
                       handleOpen={handleEditOpen}
+                      handleEditClick={handleEditClick}
                     />
-                    {/* <TableCell component="th" scope="row">
-                      {student.Name}
-                    </TableCell>
-                    <TableCell align="right">{student.Age}</TableCell>
-                    <TableCell align="right">{student.Course}</TableCell>
-                    <TableCell align="right">{student.Batch}</TableCell>
-                    <TableCell align="right">
-                      <Link>Edit</Link>
-                    </TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>
@@ -149,47 +197,53 @@ const StudentsBuild = (props) => {
       <Dialog open={addForm} onClose={handleAddClose}>
         <div className="student-form">
           <form onSubmit={handleAddFormSubmit}>
-            <TextField
-              type="text"
-              // classsName="textfield"
-              id="outlined-basic"
-              name="Name"
-              label="Name"
-              variant="outlined"
-              style={{ width: "20rem" }}
-              onChange={handleAddFormChange}
-            />
-            <TextField
-              type="text"
-              // classsName="textfield"
-              id="outlined-basic"
-              name="Age"
-              label="Age"
-              variant="outlined"
-              style={{ width: "20rem" }}
-              onChange={handleAddFormChange}
-            />
-            <TextField
-              type="text"
-              // classsName="textfield"
-              id="outlined-basic"
-              name="Course"
-              label="Course"
-              variant="outlined"
-              style={{ width: "20rem" }}
-              onChange={handleAddFormChange}
-            />
-            <TextField
-              type="text"
-              // classsName="textfield"
-              id="outlined-basic"
-              name="Batch"
-              label="Batch"
-              variant="outlined"
-              style={{ width: "20rem" }}
-              onChange={handleAddFormChange}
-            />{" "}
-            <br /> <br />
+            <Grid container spacing={4}>
+              <Grid item xs={6}>
+                <TextField
+                  type="text"
+                  id="outlined-basic"
+                  name="Name"
+                  label="Name"
+                  variant="outlined"
+                  style={{ width: "10rem" }}
+                  onChange={handleAddFormChange}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  type="text"
+                  id="outlined-basic"
+                  name="Age"
+                  label="Age"
+                  variant="outlined"
+                  style={{ width: "10rem" }}
+                  onChange={handleAddFormChange}
+                />
+              </Grid>{" "}
+              <Grid item xs={6}>
+                <TextField
+                  type="text"
+                  id="outlined-basic"
+                  name="Course"
+                  label="Course"
+                  variant="outlined"
+                  style={{ width: "10rem" }}
+                  onChange={handleAddFormChange}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  type="text"
+                  id="outlined-basic"
+                  name="Batch"
+                  label="Batch"
+                  variant="outlined"
+                  style={{ width: "10rem" }}
+                  onChange={handleAddFormChange}
+                />
+              </Grid>
+            </Grid>
+            
             {/* <Button variant="outlined" size="large" color="secondary">
               Cancel
             </Button>
@@ -238,7 +292,7 @@ const StudentsBuild = (props) => {
                   />
                 </Grid>
               </Grid> */}
-            <Stack spacing={10} direction="row" margin={1}>
+            <Stack spacing={10} direction="row" margin={4}>
               <Button
                 onClick={handleAddClose}
                 variant="outlined"
@@ -259,13 +313,13 @@ const StudentsBuild = (props) => {
           </form>
         </div>
       </Dialog>
-      
-      <EditableRows
+
+      {/* <EditableRows
         open={editForm}
         handleClose={handleEditClose}
         handleAddFormSubmit={handleAddFormSubmit}
         handleAddFormChange={handleAddFormChange}
-      />
+      /> */}
     </>
   );
 };

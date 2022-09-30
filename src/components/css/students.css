@@ -20,14 +20,15 @@
 
 .student-form {
   /* width: max-content; */
-  height: min(25rem);
+  /* height: min(25rem); */
   display: flex;
   flex-flow: column;
   align-items: center;
-  margin: 10% 20% 0;
+  padding: 10% 20%;
+  margin: auto;
 }
-
-/* form {
-  display: flex;
+/* 
+form {
+  display: gr;
   justify-content: center;
 } */
